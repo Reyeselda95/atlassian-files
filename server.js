@@ -15,16 +15,14 @@ const ADMIN_PIN = process.env.ADMIN_PIN || '1234';
 const DURATION_MS = Number(process.env.GAME_DURATION_MINUTES || 15) * 60 * 1000;
 
 const profiles = [
-  { id:'daniel', name:'Daniel', role:'Developer', icon:'⌘', color:'#6d8cff', bio:'Desarrollador de funcionalidades y commits en Bitbucket.', motive:'Quería introducir un cambio antes del cierre de versión.' },
-  { id:'laura', name:'Laura', role:'Product Owner', icon:'◈', color:'#c084fc', bio:'Responsable del backlog, prioridades y releases en Jira.', motive:'Necesitaba cumplir una fecha comprometida con el cliente.' },
-  { id:'marcos', name:'Marcos', role:'DevOps Engineer', icon:'⌁', color:'#34c7a1', bio:'Gestiona automatizaciones, pipelines y despliegues.', motive:'Quería demostrar que podía automatizar el proceso de release.' },
-  { id:'sara', name:'Sara', role:'QA Engineer', icon:'✓', color:'#f3a64a', bio:'Valida los cambios y las pruebas funcionales.', motive:'Quería evitar una publicación con errores conocidos.' },
-  { id:'javier', name:'Jira Owner', role:'Jira Owner', icon:'⚙', color:'#ed718a', bio:'Administra Jira, permisos y configuraciones de proyectos.', motive:'Quería acelerar una intervención urgente sin seguir el proceso habitual.' },
-  { id:'elena', name:'Elena', role:'Confluence Administrator', icon:'▤', color:'#51a9d8', bio:'Gestiona espacios, documentación y permisos de Confluence.', motive:'Quería ocultar una modificación documental.' },
-  { id:'pablo', name:'Pablo', role:'Bitbucket Administrator', icon:'⑂', color:'#9b8cf5', bio:'Administra repositorios, ramas y políticas de merge.', motive:'Quería facilitar cambios directos en una rama protegida.' },
-  { id:'andrea', name:'IT Service Manager', role:'IT Service Manager', icon:'◎', color:'#d49a57', bio:'Coordina servicios, solicitudes e incidencias en JSM.', motive:'Quería evitar que un incidente afectase a los SLA.' },
-  { id:'marta', name:'Security Engineer', role:'Security Engineer', icon:'⌕', color:'#398ebc', bio:'Revisa accesos, tokens y controles de seguridad.', motive:'Quería evitar una exposición de seguridad.' },
-  { id:'roberto', name:'Release Manager', role:'Release Manager', icon:'⇧', color:'#398c72', bio:'Coordina ventanas de cambio y entregas a producción.', motive:'Quería mantener el calendario de releases.' }
+  { id:'daniel', name:'Daniel', role:'Developer', icon:'〈/〉', color:'#6d8cff', bio:'Desarrollador de funcionalidades y commits en Bitbucket.', motive:'Quería introducir un cambio antes del cierre de versión.' },
+  { id:'laura', name:'Laura', role:'Product Owner', icon:'🎯', color:'#c084fc', bio:'Responsable del backlog, prioridades y releases en Jira.', motive:'Necesitaba cumplir una fecha comprometida con el cliente.' },
+  { id:'marcos', name:'Marcos', role:'DevOps Engineer', icon:'⚙️', color:'#34c7a1', bio:'Gestiona automatizaciones, pipelines y despliegues.', motive:'Quería demostrar que podía automatizar el proceso de release.' },
+  { id:'sara', name:'Sara', role:'QA Engineer', icon:'🧪', color:'#f3a64a', bio:'Valida los cambios y las pruebas funcionales.', motive:'Quería evitar una publicación con errores conocidos.' },
+  { id:'javier', name:'Javier', role:'Jira Owner', icon:'🔷', color:'#2684ff', bio:'Administra Jira, permisos y configuraciones de proyectos.', motive:'Quería acelerar una intervención urgente sin seguir el proceso habitual.' },
+  { id:'elena', name:'Elena', role:'Confluence Administrator', icon:'📘', color:'#1868a8', bio:'Gestiona espacios, documentación y permisos de Confluence.', motive:'Quería ocultar una modificación documental.' },
+  { id:'pablo', name:'Pablo', role:'Bitbucket Administrator', icon:'🪣', color:'#0052cc', bio:'Administra repositorios, ramas y políticas de merge.', motive:'Quería facilitar cambios directos en una rama protegida.' },
+  { id:'andrea', name:'Andrea', role:'IT Service Manager', icon:'🎧', color:'#d49a57', bio:'Coordina servicios, solicitudes e incidencias en JSM.', motive:'Quería evitar que un incidente afectase a los SLA.' }
 ];
 const clues = [
   { id:1, title:'Jira · El ticket desaparecido', tag:'JIRA AUDIT LOG', body:'El registro de auditoría muestra que Laura actualizó RELEASE-480 a las 17:30; Javier modificó los permisos del proyecto a las 17:42; Sara comentó QA-482 a las 17:46 y Daniel actualizó DEV-891 a las 17:51. Posteriormente, RELEASE-480 aparece eliminado.', question:'¿Qué sospechoso tenía capacidad para alterar los permisos y por qué importa?' },
@@ -44,7 +42,7 @@ function publicState(){
   const lobby=state.game.status==='lobby';
   // Antes del inicio se ocultan los nombres de las personas, pero los roles elegibles son visibles.
   const players=state.players.map(p=>({id:p.id,name:lobby?null:p.name,profileId:p.profileId,joinedAt:p.joinedAt}));
-  const submissions=state.submissions.map(s=>({playerId:s.playerId,submittedAt:s.submittedAt,elapsedMs:s.elapsedMs,score:s.score}));
+  const submissions=state.game.status==='finished'?state.submissions.map(s=>({playerId:s.playerId,submittedAt:s.submittedAt,elapsedMs:s.elapsedMs,score:s.score})):[];
   const visibleProfiles=profiles.map(p=>({...p,name:p.role}));
   const roleNames=Object.fromEntries(state.players.map(p=>[p.profileId,p.name]));
   const aliases={Daniel:roleNames.daniel||'Developer',Laura:roleNames.laura||'Product Owner',Marcos:roleNames.marcos||'DevOps Engineer',Sara:roleNames.sara||'QA Engineer',Javier:roleNames.javier||'Jira Owner',Elena:roleNames.elena||'Confluence Administrator',Pablo:roleNames.pablo||'Bitbucket Administrator',Andrea:roleNames.andrea||'IT Service Manager'};
@@ -74,7 +72,7 @@ app.post('/api/players/claim',async(req,res)=>{
   const existing=state.players.find(p=>p.clientId===clientId);
   if(existing){ if(existing.profileId!==actualProfileId && state.players.some(p=>p.profileId===actualProfileId&&p.clientId!==clientId)) return res.status(409).json({error:'Ese perfil ya está reservado.'}); existing.profileId=actualProfileId; existing.name=String(name).slice(0,40).trim(); await persist(); io.emit('state',publicState()); return res.json({ok:true,playerId:existing.id}); }
   if(state.players.some(p=>p.profileId===actualProfileId)) return res.status(409).json({error:'Ese perfil acaba de ser elegido por otra persona. Elige otro.'});
-  if(state.players.length>=10) return res.status(409).json({error:'Se ha alcanzado el máximo de 10 participantes.'});
+  if(state.players.length>=8) return res.status(409).json({error:'Se ha alcanzado el máximo de 8 participantes.'});
   const player={id:crypto.randomUUID(),clientId:String(clientId).slice(0,80),name:String(name).slice(0,40).trim(),profileId:actualProfileId,joinedAt:Date.now()};
   if(!player.name) return res.status(400).json({error:'Introduce tu nombre.'});
   state.players.push(player); await persist(); io.emit('state',publicState()); res.json({ok:true,playerId:player.id});
@@ -87,7 +85,6 @@ app.post('/api/players/release',async(req,res)=>{
 });
 app.post('/api/admin/start',admin,async(req,res)=>{
   if(state.players.length<1) return res.status(400).json({error:'Necesitas al menos un participante.'});
-  if(!state.players.some(p=>p.profileId==='daniel')||!state.players.some(p=>p.profileId==='javier')) return res.status(400).json({error:'Para que el misterio tenga solución, debe haber al menos un Developer y un Jira Owner.'});
   state.game.status='active'; state.game.startedAt=Date.now(); state.game.durationMs=DURATION_MS; if(!state.releasedClues.includes(1)) state.releasedClues.push(1); state.game.nextClueAt=Date.now()+90000; await persist(); io.emit('state',publicState()); res.json({ok:true});
 });
 app.post('/api/admin/clue/:id/release',admin,async(req,res)=>{
@@ -107,7 +104,7 @@ app.post('/api/submit',async(req,res)=>{
   const elapsedMs=Date.now()-state.game.startedAt;
   if(elapsedMs>state.game.durationMs) return res.status(409).json({error:'Se ha agotado el tiempo de investigación.'});
   if(state.submissions.some(s=>s.playerId===player.id)) return res.status(409).json({error:'Ya has enviado tu resolución.'});
-  const allowed={culprit:['javier','daniel','laura','marcos','sara','elena','pablo','andrea','marta','roberto'],tool:['jira','confluence','bitbucket','jsm'],commitAuthor:['daniel','javier','pablo','marcos','laura','sara','elena','andrea','marta','roberto'],mechanism:['bypass','permissions','pipeline','token'],motive:['accelerate','sla','hide','prove','deadline'],sequence:['javier-daniel-pipeline','daniel-javier-pipeline','javier-pipeline-daniel','daniel-pipeline-javier'],evidence:['token-audit','jira-audit','commit','pipeline'],evidence2:['procedure-change','deleted-ticket','branch-policy','qa-results']};
+  const allowed={culprit:['javier','daniel','laura','marcos','sara','elena','pablo','andrea'],tool:['jira','confluence','bitbucket','jsm'],commitAuthor:['daniel','javier','pablo','marcos','laura','sara','elena','andrea'],mechanism:['bypass','permissions','pipeline','token'],motive:['accelerate','sla','hide','prove','deadline'],sequence:['javier-daniel-pipeline','daniel-javier-pipeline','javier-pipeline-daniel','daniel-pipeline-javier'],evidence:['token-audit','jira-audit','commit','pipeline'],evidence2:['procedure-change','deleted-ticket','branch-policy','qa-results']};
   for(const k of Object.keys(allowed)) if(!allowed[k].includes(answers?.[k])) return res.status(400).json({error:'Revisa las respuestas del formulario.'});
   const score=scoreAnswers(answers,elapsedMs); state.submissions.push({playerId:player.id,answers,submittedAt:Date.now(),elapsedMs,score});
   await persist(); io.emit('state',publicState()); res.json({ok:true,elapsedMs,score});

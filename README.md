@@ -44,8 +44,15 @@ La vista previa incluida en ChatGPT funciona en modo demostración local para qu
 
 ## Mecánica de la partida
 
-- Antes del inicio, cada participante introduce su propio nombre y elige uno de los diez roles profesionales disponibles (por ejemplo, Developer o Jira Owner). Los roles reservados son visibles, pero los nombres de los participantes permanecen ocultos para los demás.
-- Al comenzar se revelan los nombres asociados a cada rol, se inicia el cronómetro y se publica inmediatamente la primera pista para todos. Para que la solución del caso sea consistente, debe participar al menos un Developer y un Jira Owner.
+- Antes del inicio, cada participante introduce su propio nombre y elige uno de los ocho roles profesionales disponibles (por ejemplo, Developer o Jira Owner). Los roles reservados son visibles, pero los nombres de los participantes permanecen ocultos para los demás.
+- Al comenzar se revelan los nombres asociados a cada rol, se inicia el cronómetro y se publica inmediatamente la primera pista para todos. No hay roles obligatorios: puede comenzar con cualquier combinación de participantes.
 - El servidor publica cada pista restante cada 90 segundos, en orden. El organizador puede usar **Adelantar siguiente pista** o **Publicar ahora**; cada adelanto reinicia el contador de 90 segundos desde el momento de la publicación. La programación sigue funcionando aunque se cierre el navegador del organizador.
 - El formulario de resolución aparece desde el inicio de la investigación. Cada participante puede modificarlo hasta enviarlo, pero el servidor acepta una única entrega por participante.
 - La interfaz usa modo oscuro fijo y alto contraste.
+
+## Privacidad de resultados y cierre
+
+- Durante la investigación, las puntuaciones, las respuestas y la clasificación no se envían a los participantes.
+- El administrador puede consultar los resultados detallados desde el panel protegido por PIN antes de finalizar.
+- Al finalizar la investigación, la clasificación se publica para todos los participantes y aparece automáticamente la resolución del misterio.
+- La solución revela que Javier coordinó la manipulación del proceso de aprobación en Confluence mediante un token personal, Daniel realizó el commit `a84f91c` para omitir la validación y el pipeline desplegó la versión 4.8.0 usando `release-automation`.
