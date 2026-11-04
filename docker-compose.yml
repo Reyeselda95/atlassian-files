@@ -1,0 +1,17 @@
+services:
+  atlassian-case-files:
+    build: .
+    container_name: atlassian-case-files
+    restart: unless-stopped
+    ports:
+      - "3080:3000"
+    environment:
+      ADMIN_PIN: "CAMBIAME-ANTES-DE-DESPLEGAR"
+      PORT: "3000"
+      DATA_DIR: "/data"
+      GAME_DURATION_MINUTES: "15"
+    volumes:
+      - atlassian_case_data:/data
+
+volumes:
+  atlassian_case_data:

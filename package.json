@@ -1,0 +1,9 @@
+{
+  "name": "atlassian-case-files",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Juego de investigación Atlassian con selección de perfiles en tiempo real y panel de administración",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "dependencies": { "express": "^4.21.2", "socket.io": "^4.8.1" }
+}
