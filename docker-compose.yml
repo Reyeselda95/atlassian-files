@@ -6,7 +6,7 @@ services:
     ports:
       - "3080:3000"
     environment:
-      ADMIN_PIN: "CAMBIAME-ANTES-DE-DESPLEGAR"
+      ADMIN_PIN: "9091"
       PORT: "3000"
       DATA_DIR: "/data"
       GAME_DURATION_MINUTES: "15"
